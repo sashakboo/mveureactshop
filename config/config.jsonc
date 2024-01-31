@@ -1,0 +1,10 @@
+{
+  /* http listening port */
+  "port": 5000,
+  /* host ip */
+  "ip": "127.0.0.1",
+  /* postgresql connection url */
+  "DATABASE_URL": "postgresql://<user>:<password>@<host>:<port>/<database>?sslmode=verify-full",
+  /* random string to hash passwords */
+  "jwtSecret": "1"
+}

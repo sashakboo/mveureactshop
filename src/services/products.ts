@@ -124,7 +124,6 @@ export async function GetListProducts(userId: string, categoryId: string | null,
 
 export async function GetBasketProducts(userId: string): Promise<Array<IBasketProduct>> {
   const basket = await Basket.find({ customer: userId });
-  console.log(basket)
   const ids = basket.map(e => e.product);
   const products = (await Product.find({ '_id': { $in: ids } }).populate('category')).map(e => {
    return {

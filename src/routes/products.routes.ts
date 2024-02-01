@@ -89,7 +89,7 @@ productsRouter.post('/update', Auth, async (req: IUpdatedProductRequest, res: Re
     const product = req.body;
     await UpdateProduct(product);
     if (product.iconPath != null) {
-      //await UpdateProductIcon(product.id, product.iconPath);
+      await UpdateProductIcon(product.id, product.iconPath);
       fs.unlink(product.iconPath, (err) => {
         if (err) 
           console.error(`Cannot delete file: ${product.iconPath}`);

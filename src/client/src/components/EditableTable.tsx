@@ -9,7 +9,7 @@ export enum InputTypes {
 }
 
 export interface ISelectItem {
-  id: number,
+  id: string,
   title: string
 }
 
@@ -83,7 +83,7 @@ export function EditableTable(props: IEditableTableProps) {
 
     if (inputType === InputTypes.select) {
       const selectItems = props.selectItems[valueIndex] ?? [];
-      let defaultSelect = newRowIndex;
+      let defaultSelect = newRowIndex.toString();
       if (rowIndex != newRowIndex){
         const currentSelect = props.values[rowIndex][valueIndex] as string;
         defaultSelect = selectItems.find(x => x.title === currentSelect)?.id ?? selectItems[0].id;
@@ -92,7 +92,7 @@ export function EditableTable(props: IEditableTableProps) {
       return (
         <td key={`${rowIndex}-${valueIndex}`}>
           <select className="form-control form-control-sm" name={propertyId} defaultValue={defaultSelect} onChange={changeHandler}>
-            <option disabled={true} value={-1}>-----</option>
+            <option disabled={true} value={'-1'}>-----</option>
             {
               selectItems.map((s, i) => {
                 return (

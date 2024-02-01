@@ -1,82 +1,77 @@
-import { executeCommand } from "../database/database";
 import { IUser } from "../models";
+import { User } from "../mongodb/models";
 
 
 export async function GetUserByEmail(email: string): Promise<IUser | null> {
-  const commandText = 'SELECT id, email, password, role, cast(active as string) as active from public.users where email = $1::varchar';
-  const params = [ email ];
-  const result = await executeCommand(commandText, params);
-  if (result.rowCount === 1) {
-      return Promise.resolve(
-          {
-              id: parseInt(result.rows[0]['id']),
-              email: result.rows[0]['email'],
-              password: result.rows[0]['password'],
-              role: result.rows[0]['role'],
-              active: result.rows[0]['active'] == 'true'
-          });
+  const user = await User.findOne({email: email });
+  if (user != null){
+    return {
+      id: user.id,
+      email: user.email,
+      password: user.password,
+      role: user.role,
+      active: user.active
+    } as IUser;
   }
+
   return null;
 }
 
-export async function GetUser(id: number): Promise<IUser | null> {
-  const commandText = 'SELECT id, email, password, role, cast(active as string) as active from public.users where id = $1::int';
-  const params = [ id ];
-  const result = await executeCommand(commandText, params);
-  if (result.rowCount === 1) {
-      return Promise.resolve(
-          {
-              id: parseInt(result.rows[0]['id']),
-              email: result.rows[0]['email'],
-              password: result.rows[0]['password'],
-              role: result.rows[0]['role'],
-              active: result.rows[0]['active'] == 'true'
-          });
+export async function GetUser(id: string): Promise<IUser | null> {
+  const user = await User.findById(id);
+  if (user != null) {
+    return {
+      id: user.id,
+      email: user.email,
+      password: user.password,
+      active: user.active,
+      role: user.role
+    } as IUser;
   }
   return null;
 }
 
 export async function CreateUser(email: string, passwordHash: string): Promise<IUser | null> {
-  const commandText = 'insert into users (email, password) values ($1::string, $2::string) RETURNING id, email, password, role;';
-  const params = [ email, passwordHash ];
-  const results = await executeCommand(commandText, params);
-  if (results.rowCount === 1) {
-    return {
-      id: parseInt(results.rows[0]['id']),
-      email: results.rows[0]['email'],
-      password: results.rows[0]['password'],
-      role: results.rows[0]['role']
-    } as IUser
-  }
-  return null;
+  let user = await User.create({
+    email: email,
+    password: passwordHash,
+    active: true,
+    role: 'admin'
+  });
+
+  await user.save();
+
+  return {
+    email: email,
+    password: passwordHash,
+    active: true,
+    role: 'admin'
+  } as IUser;
 }
 
-export async function GetUserRole(id: number): Promise<string> {
-  const commandText = 'SELECT role FROM public.users where id = $1::int';
-  const params = [ id ];
-  const result = await executeCommand(commandText, params);
-  if (result.rowCount === 1){
-      return result.rows[0]['role'];
-  }
-  return '';
+export async function GetUserRole(id: string): Promise<string> {
+  const user = await User.findById(id);
+  return user.role ?? '';
 }
 
 export async function GetUsers(): Promise<Array<IUser>> {
-  const commandText = 'select id, email, role, cast(active as string) active from public.users order by role, email';
-  const results = await executeCommand(commandText, []);
-  return results.rows.map(r => {
-      return {
-          id: parseInt(r['id']),
-          email: r['email'],
-          password: '',
-          role: r['role'],
-          active: r['active'] == 'true'
-      } as IUser
-  })
+  const users = await User.find({}).exec();
+  const results = users.map(u => {
+    return {
+      id: u.id,
+      email: u.email,
+      active: u.active,
+      password: '',
+      role: u.role
+    } as IUser;
+  });
+  return results;
 }
 
-export async function UpdateUser(userId: number, password: string, role: string, active: boolean) {
-  const commandText = 'update public.users set password = $1::string, role = $2::string, active= $3::boolean where id = $4::int';
-  const params = [ password, role, active, userId ];
-  await executeCommand(commandText, params);
+export async function UpdateUser(userId: string, password: string, role: string, active: boolean) {
+  await User.findByIdAndUpdate(userId, {
+    password: password,
+    role: role,
+    active: active
+  });
 }

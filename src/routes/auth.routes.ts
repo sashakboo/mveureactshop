@@ -114,8 +114,8 @@ authRouter.post(
 );
 
 authRouter.get('/role/:id', Auth, async (req: Request, res: Response) => {
-    const id: number = parseInt(req.params.id);
-    if (Number.isNaN(id))
+    const id: string = req.params.id;
+    if (id == null)
     {
       res.status(400);
     }

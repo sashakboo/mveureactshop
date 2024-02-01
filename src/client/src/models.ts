@@ -1,11 +1,11 @@
 export interface ICategory {
-    id: number,
+    id: string,
     title: string,
     active: boolean
 }
 
 export interface IProduct {
-    id: number,
+    id: string,
     category: ICategory,
     icon: string,
     title: string,
@@ -18,16 +18,16 @@ export interface IListProduct extends IProduct {
 }
 
 export interface IBasketProduct {
-    id: number,
+    id: string,
     title: string,
-    productId: number,
+    productId: string,
     categoryTitle: string,
     price: number
 }
 
 export interface IUpdatedProduct {
-    id: number,
-    categoryId: number,
+    id: string,
+    categoryId: string,
     title: string,
     price: number
     iconPath: string | null,
@@ -35,7 +35,7 @@ export interface IUpdatedProduct {
 }
 
 export interface ICreatedProduct {
-    categoryId: number,
+    categoryId: string,
     title: string,
     price: number,
     iconPath: string | null,
@@ -43,11 +43,11 @@ export interface ICreatedProduct {
 }
 
 export interface ICreatedOrder {
-    products: Array<{ id: number, orderPrice: number, basketItemId: number }>
+    products: Array<{ id: string, orderPrice: number, basketItemId: string }>
 }
 
 export interface IOrder {
-    id: number,
+    id: string,
     created: Date,
     customerEmail: string,
     state: string,
@@ -56,18 +56,18 @@ export interface IOrder {
 }
 
 export interface IOrderState {
-    id: number,
+    id: string,
     name: string,
     title: string
 }
 
 export interface IUpdateOrderState {
-    orderId: number,
-    state: number
+    orderId: string,
+    state: string
 }
 
 export interface IUser {
-    id: number,
+    id: string,
     email: string,
     password: string,
     role: string,

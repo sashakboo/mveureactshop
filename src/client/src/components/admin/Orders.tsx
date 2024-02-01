@@ -42,7 +42,7 @@ export default function Orders(props: IOrdersProps) {
       const order = sourceObj as IOrder;
       const updatedOrderState = {
         orderId: order.id,
-        state: form.get('state') as number
+        state: form.get('state')
       }
       await updateOrderState(updatedOrderState);
     },

@@ -37,8 +37,8 @@ orderRouter.get('/states', Auth, async (req: Request, res: Response) => {
 
 orderRouter.post('/create', Auth, async(req: ICreateOrderRequest, res: Response) => {
   try {
-    const userId = parseInt(req.params.userId);
-    if (Number.isNaN(userId))
+    const userId = req.params.userId;
+    if (userId == null)
     {
       res.status(400);
     }

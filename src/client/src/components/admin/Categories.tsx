@@ -35,7 +35,7 @@ export default function Categories(props: ICategoriesProps) {
     props.updateCategory(updatedCategory);
   }
 
-  const isActiveSelectItems = [ { id: 1, title: 'Да' }, { id: 0, title: 'Нет' } ];
+  const isActiveSelectItems = [ { id: '1', title: 'Да' }, { id: '0', title: 'Нет' } ];
   const tableProps: IEditableTableProps = {
     columnsIds: [ 'id', 'title', 'active' ],
     columnsTitle: [ 'ID', 'Наименование', 'Вкл' ],

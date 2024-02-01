@@ -48,7 +48,7 @@ export default function Products(props: IProductsProps) {
     const product = sourceObj as IProduct;
     const updatedProduct: IUpdatedProduct = {
       id: product.id,
-      categoryId: form.get('category') as number ?? product.category.id,
+      categoryId: form.get('category') ?? product.category.id,
       title: form.get('title') as string ?? product.title,
       price: form.get('price') as number ?? product.price,
       iconPath: iconPath ?? null,
@@ -73,7 +73,7 @@ export default function Products(props: IProductsProps) {
     }
 
     const newProduct: ICreatedProduct = {
-      categoryId: form.get('category') as number,
+      categoryId: form.get('category'),
       title: form.get('title') as string,
       price: form.get('price') as number,
       iconPath: iconPath ?? null,
@@ -85,7 +85,7 @@ export default function Products(props: IProductsProps) {
   }
 
   const categorySelectItems = categories.map(c => ({ id: c.id, title: c.title }));
-  const isActiveSelectItems = [ { id: 1, title: 'Да' }, { id: 0, title: 'Нет' } ];
+  const isActiveSelectItems = [ { id: '1', title: 'Да' }, { id: '0', title: 'Нет' } ];
   const tableProps: IEditableTableProps = {
     columnsIds: [ 'id', 'category', 'title', 'price', 'isactive', 'icon' ],
     columnsTitle: [ 'ID', 'Категория', 'Имя', 'Цена', 'Вкл.', 'Фото'],

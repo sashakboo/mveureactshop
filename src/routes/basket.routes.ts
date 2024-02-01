@@ -7,8 +7,8 @@ const basketRouter = Router();
 
 basketRouter.get('/', Auth, async(req: Request, res: Response) => {
   try {
-    const userId = parseInt(req.params.userId);
-    if (Number.isNaN(userId))
+    const userId = req.params.userId;
+    if (userId == null)
     {
       res.status(400);
     }    
@@ -22,8 +22,8 @@ basketRouter.get('/', Auth, async(req: Request, res: Response) => {
 
 basketRouter.get('/count', Auth, async(req: Request, res: Response) => {
   try {   
-    const userId = parseInt(req.params.userId);
-    if (Number.isNaN(userId))
+    const userId = req.params.userId;
+    if (userId == null)
     {
       res.status(400);
     }   
@@ -37,13 +37,13 @@ basketRouter.get('/count', Auth, async(req: Request, res: Response) => {
 
 basketRouter.post('/add/:id', Auth, async (req: Request, res: Response) => {
     try {        
-      const id: number = parseInt(req.params.id);
-      if (Number.isNaN(id))
+      const id = req.params.id;
+      if (id == null)
       {
         res.status(400);
       }
-      const userId = parseInt(req.params.userId);
-      if (Number.isNaN(userId))
+      const userId = req.params.userId;
+      if (userId == null)
       {
         res.status(400);
       }
@@ -57,15 +57,17 @@ basketRouter.post('/add/:id', Auth, async (req: Request, res: Response) => {
 
   basketRouter.post('/delete/:id', Auth, async (req: Request, res: Response) => {
     try {        
-      const id: number = parseInt(req.params.id);
-      if (Number.isNaN(id))
+      const id = req.params.id;
+      if (id == null)
       {
         res.status(400);
+        return;
       }
-      const userId = parseInt(req.params.userId);
-      if (Number.isNaN(userId))
+      const userId = req.params.userId;
+      if (userId == null)
       {
         res.status(400);
+        return;
       }
       await RemoveFromBasket(id);
       res.status(200).json('Товар удален из корзины');          

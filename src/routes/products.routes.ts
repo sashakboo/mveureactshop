@@ -17,8 +17,8 @@ const productsRouter = Router();
 
 productsRouter.get('/', Auth, async (req: Request, res: Response) => {
   try {
-    const userId = parseInt(req.params.userId);
-    if (Number.isNaN(userId))
+    const userId = req.params.userId;
+    if (userId == null)
     {
       res.status(400);
     }   
@@ -42,13 +42,13 @@ productsRouter.get('/admin', Auth, async (req: Request, res: Response) => {
 
 productsRouter.get('/:catId', Auth, async (req: Request, res:Response) => {
   try {
-    const catId: number = parseInt(req.params.catId);
-    if (Number.isNaN(catId))
+    const catId = req.params.catId;
+    if (catId == null)
     {
       res.status(400);
     }
-    const userId = parseInt(req.params.userId);
-    if (Number.isNaN(userId))
+    const userId = req.params.userId;
+    if (userId == null)
     {
       res.status(400);
     }   
@@ -89,7 +89,7 @@ productsRouter.post('/update', Auth, async (req: IUpdatedProductRequest, res: Re
     const product = req.body;
     await UpdateProduct(product);
     if (product.iconPath != null) {
-      await UpdateProductIcon(product.id, product.iconPath);
+      //await UpdateProductIcon(product.id, product.iconPath);
       fs.unlink(product.iconPath, (err) => {
         if (err) 
           console.error(`Cannot delete file: ${product.iconPath}`);

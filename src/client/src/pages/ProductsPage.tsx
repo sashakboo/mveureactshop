@@ -13,12 +13,12 @@ export default function ProductsPage() {
 
     const { request, loading } = useHttp();
     const auth = useContext(AuthContext);
-    const categoryId = parseInt(useParams().id ?? '');
+    const categoryId = useParams().id;
 
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const apiUrl = Number.isNaN(categoryId) ? '/api/products' : `/api/products/${categoryId}`;
+                const apiUrl = categoryId == null ? '/api/products' : `/api/products/${categoryId}`;
                 const response = await request(apiUrl, 'GET', null, { Authorization: `Bearer ${auth.token}` });
                 const data = response as Array<IListProduct>;
                 setProducts(data);    

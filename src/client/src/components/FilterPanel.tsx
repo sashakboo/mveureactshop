@@ -27,7 +27,7 @@ export default function FilterPanel() {
                     <div className="collapse navbar-collapse" id="navbarSupportedContent2">
                         <ul className="navbar-nav me-auto mb-2 mb-lg-0">
                             <li className="nav-item acitve" key={0}>
-                                <Link className="nav-link text-white" to="/filter/cat/all">Все</Link>
+                                <Link className="nav-link text-white" to="/">Все</Link>
                             </li>
                             {categories.map(c => {
                                 return (

@@ -16,7 +16,7 @@ export default function Users(props: IUserProps) {
   const { request, error, clearError, loading } = useHttp();
   const auth = useContext(AuthContext);
 
-  const isActiveSelectItems = [ { id: 1, title: 'Да' }, { id: 0, title: 'Нет' } ];
+  const isActiveSelectItems = [ { id: '1', title: 'Да' }, { id: '0', title: 'Нет' } ];
   const tableProps: IEditableTableProps = {
     columnsIds: [ 'id', 'email', 'role', 'password', 'active' ],
     columnsTitle: [ 'ID', 'Email', 'Роль', 'Пароль', 'Вкл'],

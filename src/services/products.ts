@@ -1,207 +1,204 @@
 import fs from 'fs';
-import { executeCommand } from "../database/database";
 import { IProduct, IBasketProduct, ICreatedProduct, ICategory, IUpdatedProduct, IListProduct } from "../models";
+import { Basket, Category, Product } from '../mongodb/models';
 
 export async function GetCategories(onlyActive: boolean): Promise<Array<ICategory>> {
-  let commandText = 'select id, title, cast(active as string) as active from productscategory';
-  let params: Array<any> = [];
+  let searchParams = {};
   if (onlyActive){
-    commandText += ' where active = $1::boolean'
-    params = [...params, onlyActive];
+    searchParams = { ...searchParams, active: true };
   }
+  const categories = await Category.find(searchParams);
 
-  const results = await executeCommand(commandText, params);
-  return results.rows.map(r => {
+  return categories.map(c => {
     return {
-      id: parseInt(r['id']),
-      title: r['title'],
-      active: r['active'] === 'true',
+      id: c.id,
+      title: c.title,
+      active: c.active
     } as ICategory;
   });
 }
 
 export async function CreateCategory(categoryName: string): Promise<ICategory> {
-  const commandText = 'insert into public.productscategory(title) values ($1::string) RETURNING id;';
-  const results = await executeCommand(commandText, [ categoryName ]);
-  if (results.rowCount === 0){
-    throw new Error(`Не удалось создать категорию ${categoryName}`);
-  }
+  const category = await Category.create({
+    title: categoryName,
+    active: true
+  });
 
   return {
-    id: parseInt(results.rows[0]['id']),
-    title: categoryName
+    id: category.id,
+    title: category.title,
+    active: category.active
   } as ICategory;
 }
 
 export async function UpdateCategory(category: ICategory): Promise<ICategory> {
-  const commandText = 'update public.productscategory set title = $1::string, active = $2::boolean where id = $3::int';
-  await executeCommand(commandText, [ category.title, category.active, category.id ]);
-  return category;
+  const updated = await Category.findByIdAndUpdate(category.id, {
+    title: category.title,
+    active: category.active ?? true
+  });
+
+  return {
+    id: updated.id,
+    title: updated.title,
+    active: updated.active
+  } as ICategory;
 }
 
-export async function GetProduct(id: number): Promise<IProduct | null> {
-  const commandText = 'SELECT ' +
-    'p.id, p.title, c.id as categoryid, c.title as categorytitle, cast(c.active as string) as categoryactive, p.price, cast(p.active as string) active, convert_from(p.icon, \'UTF8\') as icon ' + 
-    'FROM public.products as p inner join public.productscategory c on p.category = c.id where p.id = $1::int';
-  const results = await executeCommand(commandText, [id]);
-  if (results.rowCount !== 1)
-    return null;
-
-  const row = results.rows[0];
-  const product: IProduct = {
-    id: parseInt(row["id"]),
+export async function GetProduct(id: string): Promise<IProduct | null> {
+  const product = await Product.findById(id).populate<{ category: ICategory }>('category');
+  return {
+    id: product.id,
     category : {
-        id: parseInt(row["categoryid"]),
-        title: row["categorytitle"],
-        active:  row['categoryactive'] === 'true',
+        id: product.category.id,
+        title: product.category.title,
+        active: product.category.active,
     },
-    title: row["title"],
-    price: parseInt(row["price"]),
-    isActive: row['active'] === 'true',
-    icon: row['icon']
-  }
-  return product;
+    title: product.title,
+    price: product.price,
+    isActive: product.isActive,
+    icon: product.icon
+  } as IProduct;
 }
 
-export async function GetProducts(categoryId: number | null, isActive: boolean | null): Promise<Array<IProduct>> {
-  let commandText = 'SELECT ' +
-    'p.id, p.title, c.id as categoryid, c.title as categorytitle, cast(p.active as string) as categoryactive, p.price, cast(p.active as string) as active, convert_from(p.icon, \'UTF8\') as icon ' + 
-    'FROM public.products as p inner join public.productscategory c on p.category = c.id ' +
-    'where c.active = true ';
-  let params: Array<any> = []
-  if (isActive != null){
-    params = [ ...params, isActive ];
-    commandText += ` and p.active = $${params.length}::boolean`;
-  }
-  if (categoryId != null){
-    params = [ ...params, categoryId ];
-    commandText += ` and category = $${params.length}::int`;
-  }
-  commandText += ' order by p.active desc, id desc';
+export async function GetProducts(categoryId: string | null, isActive: boolean | null): Promise<Array<IProduct>> {
+  let searchParams = {};
+  if (categoryId != null)
+    searchParams = { ...searchParams, categoryId: categoryId };
 
-  const results = await executeCommand(commandText, params);
-  const products = results.rows.map(r => {
-      const product: IProduct = {
-          id: parseInt(r["id"]),
-          category : {
-              id: parseInt(r["categoryid"]),
-              title: r["categorytitle"],
-              active: r['categoryactive'] === 'true',
-          },
-          title: r["title"],
-          price: parseInt(r["price"]),
-          isActive: r['active'] === 'true',
-          icon: r['icon']
-      }
-      return product;
+  if (isActive != null)
+    searchParams = { ...searchParams, isActive: isActive };
+
+  var products = await Product.find(searchParams).populate<{ category: ICategory }>('category');
+  var result = products.map(p => {
+      return {
+        id: p.id,
+        category : {
+            id: p.category.id,
+            title: p.category.title,
+            active: p.category.active,
+        },
+        title: p.title,
+        price: p.price,
+        isActive: p.isActive,
+        icon: p.icon
+      } as IProduct;
   });
-  return Promise.resolve(products);
+
+  return result;
 }
 
-export async function GetListProducts(userId: number, categoryId: number | null, isActive: boolean | null): Promise<Array<IListProduct>> {
-  let commandText = 'SELECT ' +
-    'p.id, p.title, c.id as categoryid, c.title as categorytitle, cast(c.active as string) as categoryactive, ' + 
-    'p.price, cast(p.active as string) as active, convert_from(p.icon, \'UTF8\') as icon, count(b.id) as basketcount ' + 
-    'FROM public.products as p inner join public.productscategory c on p.category = c.id ' +
-    'left join public.basket b on b.product = p.id and b.customer = $1::int ' +
-    'where c.active = true';
-  let params: Array<any> = [ userId ]
-  if (isActive != null){
-    params = [ ...params, isActive ];
-    commandText += ` and p.active = $${params.length}::boolean `;
-  }
-  if (categoryId != null){
-    params = [ ...params, categoryId ];
-    commandText += ` and category = $${params.length}::int `;
-  }
-  commandText += ' group by p.id, p.title, c.id, c.title, c.active, p.price, p.active, p.icon '
-  commandText += ' order by p.active desc, id desc';
+export async function GetListProducts(userId: string, categoryId: string | null, isActive: boolean | null): Promise<Array<IListProduct>> {
 
-  const results = await executeCommand(commandText, params);
-  const products = results.rows.map(r => {
-      const product: IListProduct = {
-          id: parseInt(r["id"]),
-          category : {
-              id: parseInt(r["categoryid"]),
-              title: r["categorytitle"],
-              active: r['categoryactive'] === 'true',
-          },
-          title: r["title"],
-          price: parseInt(r["price"]),
-          isActive: r['active'] === 'true',
-          basketCount: parseInt(r['basketcount']),
-          icon: r['icon']
-      }
-      return product;
+  let searchParams = {};
+  if (categoryId != null)
+    searchParams = { ...searchParams, category: categoryId };
+  if (isActive != null)
+    searchParams = { ...searchParams, isActive: isActive };
+    
+  let products = (await Product.find(searchParams).populate<{ category: ICategory }>('category'))
+    .filter(e => e.category.active === true);
+
+  const basket = (await Basket.find({ customer: userId })).reduce((acc, e) => {
+    acc.set(e.product, (acc.get(e.product) ?? 0) + 1);
+    return acc;
+  }, new Map<string, number>());
+
+  const result = products.map(e => {
+    return {
+      basketCount: basket.get(e.id),
+      category: {
+        id: e.category.id,
+        active: e.category.active,
+        title: e.category.title
+      },
+      icon: e.icon,
+      id: e.id,
+      isActive: e.isActive,
+      price: e.price,
+      title: e.title
+    } as IListProduct;
   });
-  return Promise.resolve(products);
+
+  return result;
 }
 
-export async function GetBasketProducts(userId: number): Promise<Array<IBasketProduct>> {
-  const commandText = 'select b.id, p.id as productid, p.title, c.title as categorytitle, p.price ' + 
-    'from public.basket b ' + 
-    'inner join public.products p on p.id = b.product '+ 
-    'inner join public.productscategory c on p.category = c.id ' + 
-    'where b.customer = $1::int';
-  const params = [ userId ];
-  const results = await executeCommand(commandText, params);
-  const products = results.rows.map(r => {
-      const product: IBasketProduct = {
-          id: parseInt(r["id"]),
-          title: r["title"],
-          categoryTitle: r["categorytitle"],
-          price: parseInt(r["price"]),
-          productId: parseInt(r["productid"])
-      }
-      return product;
+export async function GetBasketProducts(userId: string): Promise<Array<IBasketProduct>> {
+  const basket = await Basket.find({ customer: userId });
+  console.log(basket)
+  const ids = basket.map(e => e.product);
+  const products = (await Product.find({ '_id': { $in: ids } }).populate('category')).map(e => {
+   return {
+    id: e.id,
+    category: {
+      id: e.category.id,
+      active: e.category.active,
+      title: e.category.title
+    },
+    isActive: e.isActive,
+    price: e.price,
+    icon: '',
+    title: e.title
+   } as IProduct; 
   });
-  return Promise.resolve(products);
+
+  const basketProducts = basket.map(e => {
+    const product = products.filter(p => p.id == e.product)[0];
+    return {
+      id: e.id,
+      productId: product.id,
+      categoryTitle: product.category.title,
+      price: product.price,
+      title: product.title
+    } as IBasketProduct;
+  });
+
+  return basketProducts;
 }
 
-export async function GetBasketCount(userId: number): Promise<number> {
-  const commandText = 'select count(id) as count from public.basket where customer = $1::int';
-  const params = [ userId ];
-  const results = await executeCommand(commandText, params);
-  if (results.rowCount !== 1)
-    return Promise.resolve(0);
-
-  const count = results.rows[0]['count'] as number
-  return Promise.resolve(count);
+export async function GetBasketCount(userId: string): Promise<number> {
+  const basketCount = await Basket.countDocuments({ customer: userId });
+  return basketCount;
 }
 
-export async function AddToBasket(productId: number, userId: number): Promise<void> {
-  const commandText = 'insert into public.basket (product, customer) values ($1::int, $2::int) RETURNING id';
-  const params = [ productId, userId ];
-  await executeCommand(commandText, params);
+export async function AddToBasket(productId: string, userId: string): Promise<void> {
+  const basketItem = await Basket.create({
+    product: productId, 
+    customer: userId
+  });
+  await basketItem.save();
 }
 
-export async function RemoveFromBasket(id: number): Promise<void> {
-  const commandText = 'delete from public.basket where id = $1::int';
-  const params = [ id ];
-  await executeCommand(commandText, params);
+export async function RemoveFromBasket(id: string): Promise<void> {
+  await Basket.findByIdAndDelete(id);
 }
 
-export async function CreateProduct(product: ICreatedProduct): Promise<number | null> {
-  const commandText = 'insert into public.products (title, category, price, active) ' + 
-    'values ($1::string, $2::int, $3::numeric, $4::boolean) ' +
-    'RETURNING id';
-  const params = [ product.title, product.categoryId, product.price, product.isActive ];
-  const result = await executeCommand(commandText, params);
-  if (result.rowCount === 1)
-    return parseInt(result.rows[0]['id'])
+export async function CreateProduct(product: ICreatedProduct): Promise<string | null> {
+  const createdProduct = await Product.create({
+    title: product.title,
+    category: product.categoryId,
+    isActive: product.isActive,
+    price: product.price
+  });
 
-  return null;
+  await createdProduct.save();
+  return createdProduct.id;
 }
 
 export async function UpdateProduct(product: IUpdatedProduct) {
-  const commandText = 'update public.products set category = $1::int, title = $2::string, price = $3::numeric, active = $4::boolean where id = $5::int';
-  const params = [ product.categoryId, product.title, product.price, product.isActive, product.id ];
-  await executeCommand(commandText, params);
+  const updatedProduct = await Product.findByIdAndUpdate(product.id, {
+    category: product.categoryId,
+    title: product.title,
+    price: product.price,
+    isActive: product.isActive
+  });
 
+  await updatedProduct.save();
 }
 
-export async function UpdateProductIcon(productId: number, iconPath: string) {
+export async function UpdateProductIcon(productId: string, iconPath: string) {
   const iconBase64 = fs.readFileSync(iconPath, 'base64');
-  const commandText = 'update public.products set icon = convert_to($1::string, \'UTF8\') where id = $2::int';
-  await executeCommand(commandText, [ iconBase64, productId ]);
+  const updatedProduct = await Product.findByIdAndUpdate(productId, {
+    icon: iconBase64
+  });
+  await updatedProduct.save();
 }

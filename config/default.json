@@ -1,10 +1,6 @@
 {
-  /* http listening port */
   "port": 5000,
-  /* host ip */
   "ip": "127.0.0.1",
-  /* mongodb connection url */
   "MONGODB_URL": "mongodb://admin:11111@127.0.0.1:27019/mveureactshop?authSource=admin",
-  /* random string to hash passwords */
   "jwtSecret": "1"
 }

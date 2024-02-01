@@ -105,7 +105,7 @@ export async function GetListProducts(userId: string, categoryId: string | null,
 
   const result = products.map(e => {
     return {
-      basketCount: basket.get(e.id),
+      basketCount: basket.get(e.id) ?? 0,
       category: {
         id: e.category.id,
         active: e.category.active,

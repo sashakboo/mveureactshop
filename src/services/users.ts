@@ -36,7 +36,7 @@ export async function CreateUser(email: string, passwordHash: string): Promise<I
     email: email,
     password: passwordHash,
     active: true,
-    role: 'admin'
+    role: 'user'
   });
 
   await user.save();
@@ -46,7 +46,7 @@ export async function CreateUser(email: string, passwordHash: string): Promise<I
     email: email,
     password: passwordHash,
     active: true,
-    role: 'admin'
+    role: user.role
   } as IUser;
 }
 

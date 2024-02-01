@@ -14,7 +14,13 @@
 ```
 
 ## Установить все node-модули
+Серверные
+
 `npm install`
+
+Клиентские:
+
+`npm --prefix ./src/client install`
 
 ## Наполнить БД тестовыми данными
 `npm run initializedb`

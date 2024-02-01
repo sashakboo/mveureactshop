@@ -5,6 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "initializedb": "npx ts-node ./src/mongodb/initialize.ts",
     "dev": "cross-env NODE_ENV=development concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:server": "nodemon --watch ./src/**/*.ts --exec node --experimental-specifier-resolution=node --loader ts-node/esm ./src/index.ts",
     "dev:client": "npm run start --prefix src/client",

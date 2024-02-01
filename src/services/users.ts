@@ -42,6 +42,7 @@ export async function CreateUser(email: string, passwordHash: string): Promise<I
   await user.save();
 
   return {
+    id: user.id,
     email: email,
     password: passwordHash,
     active: true,
@@ -51,7 +52,7 @@ export async function CreateUser(email: string, passwordHash: string): Promise<I
 
 export async function GetUserRole(id: string): Promise<string> {
   const user = await User.findById(id);
-  return user.role ?? '';
+  return user?.role;
 }
 
 export async function GetUsers(): Promise<Array<IUser>> {

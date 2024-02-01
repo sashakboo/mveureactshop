@@ -7,9 +7,9 @@ export const useAuth = () => {
   
   const [token, setToken] = useState<string | null>(initialData.token);
   const [ready, setReady] = useState(false);
-  const [userId, setUserId] = useState<number | null>(initialData.userId);
+  const [userId, setUserId] = useState<string | null>(initialData.userId);
 
-  const login = useCallback((jwtToken: string | null, id: number | null) => {
+  const login = useCallback((jwtToken: string | null, id: string | null) => {
     setToken(jwtToken);
     setUserId(id);
     localStorage.setItem(storageName, JSON.stringify({

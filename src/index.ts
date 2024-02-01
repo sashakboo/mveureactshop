@@ -41,8 +41,9 @@ if (process.env.NODE_ENV === 'production') {
 
 mongoose.connect(MONGODB_URL).then(() => {
   console.log('connected to mongodb')
-  app.listen(PORT, IP,  () => console.log(`App has been started on port: ${PORT}, IP: ${IP}`));
 }).catch((err) => {
   console.log(err);
   throw err;
 });
+
+app.listen(PORT, IP,  () => console.log(`App has been started on port: ${PORT}, IP: ${IP}`));

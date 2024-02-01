@@ -20,7 +20,7 @@ productsRouter.get('/', Auth, async (req: Request, res: Response) => {
     const userId = req.params.userId;
     if (userId == null)
     {
-      res.status(400);
+      return res.status(400).json('Ошибка');
     }   
     const filteredProducts = await GetListProducts(userId, null, true);
     res.json(filteredProducts);          
@@ -45,12 +45,12 @@ productsRouter.get('/:catId', Auth, async (req: Request, res:Response) => {
     const catId = req.params.catId;
     if (catId == null)
     {
-      res.status(400);
+      return res.status(400).json('Ошибка');
     }
     const userId = req.params.userId;
     if (userId == null)
     {
-      res.status(400);
+      return res.status(400).json('Ошибка');
     }   
     const filteredProducts = await GetListProducts(userId, catId, true);
     res.json(filteredProducts);          
@@ -65,8 +65,7 @@ productsRouter.post('/create', Auth, async (req: ICreatedProductRequest, res: Re
     const product = req.body;
     const productId = await CreateProduct(product);
     if (productId == null) {
-      res.status(400).json({ message: 'Что-то пошло не так, попробуйте снова' });
-      return;
+      return res.status(400).json({ message: 'Что-то пошло не так, попробуйте снова' });
     }
     if (product.iconPath != null) {
       await UpdateProductIcon(productId, product.iconPath);

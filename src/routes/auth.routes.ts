@@ -117,7 +117,7 @@ authRouter.get('/role/:id', Auth, async (req: Request, res: Response) => {
     const id: string = req.params.id;
     if (id == null)
     {
-      res.status(400);
+      return res.status(400).json('Роль не найдена');
     }
     const role = await GetUserRole(id);
     res.json({ role })

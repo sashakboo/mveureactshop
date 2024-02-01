@@ -16,10 +16,10 @@ export default function NavBar() {
 
     const fetchUserRole = async () => {
         try {
-            if (!isAuthenticated || Number.isNaN(userId))
+            if (!isAuthenticated || userId == null || userId == '')
               return;
 
-            const apiUrl = `/api/auth/role/${userId as number}`;
+            const apiUrl = `/api/auth/role/${userId}`;
             const response = await request(apiUrl, 'GET', null, { Authorization: `Bearer ${token}` });
             const data = response as any;
             setIsAdmin(data.role === 'admin');    

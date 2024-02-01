@@ -4,8 +4,8 @@ function noop() {}
 
 export interface IAuthContext {
     token: string | null,
-    userId: number | null,
-    login: (jwtToken: string | null, id: number | null) => void,
+    userId: string | null,
+    login: (jwtToken: string | null, id: string | null) => void,
     logout: () => void,
     isAuthenticated: boolean
 }

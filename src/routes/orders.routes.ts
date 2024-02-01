@@ -40,7 +40,7 @@ orderRouter.post('/create', Auth, async(req: ICreateOrderRequest, res: Response)
     const userId = req.params.userId;
     if (userId == null)
     {
-      res.status(400);
+      return res.status(400).json('Ошибка');
     }
     const createdOrder = req.body as ICreatedOrder;
     const orderId = await CreateOrder(userId, createdOrder);

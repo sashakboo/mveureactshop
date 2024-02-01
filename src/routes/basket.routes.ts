@@ -10,7 +10,7 @@ basketRouter.get('/', Auth, async(req: Request, res: Response) => {
     const userId = req.params.userId;
     if (userId == null)
     {
-      res.status(400);
+      return res.status(400).json('Ошибка');
     }    
     const filteredProducts = await GetBasketProducts(userId);
     res.json(filteredProducts);          
@@ -25,7 +25,7 @@ basketRouter.get('/count', Auth, async(req: Request, res: Response) => {
     const userId = req.params.userId;
     if (userId == null)
     {
-      res.status(400);
+      return res.status(400).json('Ошибка');
     }   
     const result = await GetBasketCount(userId);
     res.json(result);          
@@ -40,12 +40,12 @@ basketRouter.post('/add/:id', Auth, async (req: Request, res: Response) => {
       const id = req.params.id;
       if (id == null)
       {
-        res.status(400);
+        return res.status(400).json('Ошибка');
       }
       const userId = req.params.userId;
       if (userId == null)
       {
-        res.status(400);
+        return res.status(400).json('Ошибка');
       }
       await AddToBasket(id, userId);
       res.status(200).json('Товар добален в корзину');          
@@ -60,14 +60,12 @@ basketRouter.post('/add/:id', Auth, async (req: Request, res: Response) => {
       const id = req.params.id;
       if (id == null)
       {
-        res.status(400);
-        return;
+        return res.status(400).json('Ошибка');
       }
       const userId = req.params.userId;
       if (userId == null)
       {
-        res.status(400);
-        return;
+        return res.status(400).json('Ошибка');
       }
       await RemoveFromBasket(id);
       res.status(200).json('Товар удален из корзины');          
